@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <QuestScriptDef>
+    <defName>RescueShuttle_PawnPickup</defName>
+    <isRootSpecial>true</isRootSpecial>
+    <autoAccept>true</autoAccept>
+    <defaultHidden>true</defaultHidden>
+    <questDescriptionAndNameRules>
+      <rulesStrings>
+        <li>questName->Rescue Shuttle</li>
+        <li>questDescription-></li>
+      </rulesStrings>
+    </questDescriptionAndNameRules>
+   
+    <root Class="QuestNode_Sequence">
+      <nodes>
+        <li Class="QuestNode_Set">
+          <name>shuttleArriveTicks</name>
+          <value>$(roundToTicksRough(randFloat(2,3)*600)*100)</value> <!-- 60000 ticks per day, so 2-3 days --> 
+        </li>
+        <li Class="QuestNode_Set">
+          <name>goodwillChangeOnShuttleDestroyed</name>
+          <value>-25</value>
+        </li>
+         <li Class="RescueShuttle.QuestNode_GetFactionMember">
+          <storeAs>permitFactionMember</storeAs>
+          <faction>$permitFaction</faction>
+        </li>
+
+ 	    <li Class="QuestNode_Letter">
+	 	  <label>Shuttle coming</label>
+	 	  <text>The shuttle from [permitFaction_name] will arrive in [shuttleArriveTicks_duration].</text>
+	    </li>
+		 
+
+		<li Class="QuestNode_ShuttleDelay">
+          <delayTicks>$shuttleArriveTicks</delayTicks>
+            <node Class="QuestNode_Sequence">
+              <nodes>
+                <li Class="QuestNode_SubScript">
+                  <def>Util_TransportShip_Pickup</def>
+                  <parms>
+                    <leaveDelayTicks>$(60000)</leaveDelayTicks>
+                    <leaveImmediatelyWhenSatisfied>true</leaveImmediatelyWhenSatisfied>
+                    <!-- <acceptColonists>true</acceptColonists> -->
+                    <!-- <onlyAcceptColonists>true</onlyAcceptColonists> -->
+                    <requiredPawns>$colonistsToRescue</requiredPawns>
+                  </parms>
+                </li>
+				<li Class="QuestNode_InspectString">
+					<targets>$colonistsToRescue</targets>
+					<inspectString TKey="InspectStringDepartShuttle">Should depart on shuttle</inspectString>
+				</li>
+
+                <li Class="QuestNode_Letter">
+                  <label TKey="LetterLabelShuttleArrived">Shuttle arrived</label>
+                  <text TKey="LetterTextShuttleArrived">The shuttle has arrived to collect\n\n[colonistsToRescue]</text>
+                  <lookTargets>$pickupShipThing</lookTargets>
+                </li>
+            </nodes>
+          </node>
+        </li>
+
+        <!-- Shuttle is destroyed -->
+        <li Class="QuestNode_Signal">
+          <inSignal>pickupShipThing.Destroyed</inSignal>
+          <node Class="QuestNode_Sequence">
+            <nodes>
+              <li Class="QuestNode_End">
+                <outcome>Fail</outcome>
+                <goodwillChangeAmount>$goodwillChangeOnShuttleDestroyed</goodwillChangeAmount>
+                <goodwillChangeFactionOf>$pickupShipThing</goodwillChangeFactionOf>
+                <goodwillChangeReason>ShuttleDestroyed</goodwillChangeReason>
+              </li>
+            </nodes>
+          </node>
+        </li>
+
+        <!-- Shuttle sent away -->
+        <li Class="QuestNode_Signal">
+          <inSignal>pickupShipThing.SentSatisfied</inSignal>
+          <node Class="QuestNode_Sequence">
+            <nodes>
+              <li Class="QuestNode_End">
+                <outcome>Success</outcome>
+              </li>
+            </nodes>
+          </node>
+        </li>
+
+        <li Class="QuestNode_Signal">
+          <inSignal>pickupShipThing.SentUnsatisfied</inSignal>
+          <node Class="QuestNode_End">
+            <outcome>Fail</outcome>
+          </node>
+        </li>
+        
+      </nodes>
+    </root>
+  </QuestScriptDef>
+  
+</Defs>

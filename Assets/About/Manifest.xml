@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Manifest>
+  <identifier>RescueShuttle</identifier>
+  <version>1.4.0</version>
+  <dependencies>
+	  <li>brrainz.harmony</li>
+	  <li>UnlimitedHugs.HugsLib</li>
+	  <li>Ludeon.RimWorld.Royalty</li>
+  </dependencies>
+  <incompatibleWith />
+  <loadBefore>
+  </loadBefore>
+  <loadAfter>
+    <li>Ludeon.RimWorld</li>
+	<li>Ludeon.RimWorld.Royalty</li>
+	<li>UnlimitedHugs.HugsLib</li>
+  </loadAfter>
+  <!-- <suggests> -->
+    <!-- <li>ExpansionMod &gt;= 1.5</li> -->
+    <!-- <li>OtherCoolMod</li> -->
+  <!-- </suggests> -->
+  <showCrossPromotions>false</showCrossPromotions>
+  <!-- <manifestUri>https://raw.githubusercontent.com/OrionFive/Gastronomy/master/About/Manifest.xml</manifestUri> -->
+  <!-- <downloadUri>https://github.com/OrionFive/Gastronomy/releases</downloadUri> -->
+</Manifest>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <QuestScriptDef>
+    <defName>RescueShuttle_PawnPickup</defName>
+    <isRootSpecial>true</isRootSpecial>
+    <autoAccept>true</autoAccept>
+    <defaultHidden>true</defaultHidden>
+    <questDescriptionAndNameRules>
+      <rulesStrings>
+        <li>questName->Rescue Shuttle</li>
+        <li>questDescription-></li>
+      </rulesStrings>
+    </questDescriptionAndNameRules>
+   
+    <root Class="QuestNode_Sequence">
+      <nodes>
+
+        <li Class="QuestNode_Set">
+          <name>shuttleArriveTicks</name>
+          <value>$(roundToTicksRough(randFloat(2,3)*600)*100)</value> <!-- 60000 ticks per day, so 2-3 days --> 
+        </li>
+        <li Class="QuestNode_Set">
+          <name>goodwillChangeOnShuttleDestroyed</name>
+          <value>-25</value>
+        </li>
+        <li Class="RescueShuttle.QuestNode_GetFactionMember">
+          <storeAs>permitFactionMember</storeAs>
+          <faction>$permitFaction</faction>
+        </li>
+
+	     <li Class="QuestNode_Letter">
+	 	  <label>Shuttle coming</label>
+	 	  <text>The shuttle from [permitFaction_name] will arrive in [shuttleArriveTicks_duration].</text>
+	     </li>
+		 
+        <!-- Shuttle -->
+        <li Class="QuestNode_ShuttleDelay">
+          <!-- <delayTicks>$shuttleArriveTicks</delayTicks> -->
+		  <delayTicks>500</delayTicks>
+            <node Class="QuestNode_Sequence">
+              <nodes>
+                <li Class="QuestNode_GenerateShuttle">
+                  <storeAs>shuttle</storeAs>
+                  <acceptColonists>true</acceptColonists>
+                  <onlyAcceptColonists>true</onlyAcceptColonists>
+                  <dropEverythingIfUnsatisfied>true</dropEverythingIfUnsatisfied>
+                  <leaveImmediatelyWhenSatisfied>true</leaveImmediatelyWhenSatisfied>
+				  <hideControls>true</hideControls>
+                  <requiredPawns>$colonistsToRescue</requiredPawns>
+                </li>
+                <li Class="QuestNode_SpawnSkyfaller">
+                  <skyfallerDef>ShuttleIncoming</skyfallerDef>
+                  <innerThings>$shuttle</innerThings>
+                  <tryLandInShipLandingZone>True</tryLandInShipLandingZone>
+                  <lookForSafeSpot>True</lookForSafeSpot>
+                  <factionOfForSafeSpot>$permitFactionMember</factionOfForSafeSpot>
+                </li>
+                <li Class="QuestNode_SendShuttleAwayOnCleanup">
+                  <shuttle>$shuttle</shuttle>
+                </li>
+                <li Class="QuestNode_Letter">
+                  <label>Shuttle arrived</label>
+                  <text>The shuttle has arrived to collect\n\n[colonistsToRescue]</text>
+                  <lookTargets>$shuttle</lookTargets>
+                </li>
+                <li Class="QuestNode_ShuttleLeaveDelay">
+                  <delayTicks>$(60000)</delayTicks>
+                  <shuttle>$shuttle</shuttle>
+                  <inSignalsDisable>
+                    <li>shuttle.Destroyed</li>
+                    <li>shuttle.SentSatisfied</li>
+                    <li>shuttle.SentUnsatisfied</li>
+                  </inSignalsDisable>
+                  <node Class="QuestNode_Sequence">
+                    <nodes>
+                      <li Class="QuestNode_SendShuttleAway">
+                        <shuttle>$shuttle</shuttle>
+                        <dropEverything>true</dropEverything>
+                      </li>
+                      <li Class="QuestNode_End">
+                        <outcome>Fail</outcome>
+                      </li>
+                    </nodes>
+                  </node>
+                </li>
+            </nodes>
+          </node>
+        </li>
+
+        <!-- Shuttle is destroyed -->
+        <li Class="QuestNode_Signal">
+          <inSignal>shuttle.Destroyed</inSignal>
+          <node Class="QuestNode_Sequence">
+            <nodes>
+              <li Class="QuestNode_ChangeFactionGoodwill">
+                <faction>$permitFaction</faction>
+                <change>$goodwillChangeOnShuttleDestroyed</change>
+                <reason>shuttle destroyed</reason>
+              </li>
+              <li Class="QuestNode_End" />
+            </nodes>
+          </node>
+        </li>
+
+        <!-- Shuttle sent away -->
+        <li Class="QuestNode_Signal">
+          <inSignal>shuttle.SentSatisfied</inSignal>
+          <node Class="QuestNode_Sequence">
+            <nodes>
+              <li Class="QuestNode_SendShuttleAway">
+                <shuttle>$shuttle</shuttle>
+              </li>
+              <li Class="QuestNode_End" />
+            </nodes>
+          </node>
+        </li>
+
+        <li Class="QuestNode_Signal">
+          <inSignal>shuttle.SentUnsatisfied</inSignal>
+          <node Class="QuestNode_End"/>
+        </li>
+        
+      </nodes>
+    </root>
+  </QuestScriptDef>
+  
+</Defs>
